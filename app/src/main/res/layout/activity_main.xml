@@ -11,8 +11,8 @@
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_margin="5dp"
-        android:padding="1dp"
         android:background="@drawable/bg_drawing_view_layout"
+        android:padding="1dp"
         app:layout_constraintBottom_toTopOf="@+id/layout_paint_colors"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
@@ -20,20 +20,18 @@
 
         <ImageView
             android:id="@+id/iv_background"
-            android:scaleType="centerCrop"
-            android:src="@drawable/sample_image"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"/>
+            android:layout_height="match_parent"
+            android:contentDescription="background_image"
+            android:scaleType="centerCrop"
+            android:src="@drawable/sample_image" />
 
         <com.deyvitineo.drawingapp.DrawingView
             android:id="@+id/drawing_view"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_marginBottom="50dp"/>
+            android:layout_height="match_parent" />
 
     </FrameLayout>
-
-
 
 
     <!--TODO("Add pallet color picker) -->
@@ -126,6 +124,12 @@
             android:onClick="paintClicked"
             android:src="@drawable/pallet_normal"
             android:tag="@color/purple" />
+
+        <com.github.dhaval2404.colorpicker.widget.ColorPalette
+            android:id="@+id/color_picker"
+            android:layout_width="25dp"
+            android:layout_height="25dp"
+            android:layout_margin="2dp" />
 
     </LinearLayout>
 
