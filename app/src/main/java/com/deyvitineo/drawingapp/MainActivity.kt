@@ -45,6 +45,13 @@ class MainActivity : AppCompatActivity() {
             initColorPicker()
         }
 
+        ib_undo.setOnClickListener {
+            val undoPerformed = drawing_view.undoPath()
+            if(!undoPerformed){
+                Toast.makeText(this, "There is nothing to undo", Toast.LENGTH_SHORT).show()
+            }
+        }
+
         ib_load_image.setOnClickListener {
             if (isStoragePermissionGranted()) {
                 val pickPhotoIntent =

@@ -149,7 +149,17 @@
             android:layout_height="50dp"
             android:layout_margin="5dp"
             android:contentDescription="gallery"
+            android:scaleType="fitXY"
             android:src="@drawable/ic_gallery" />
+
+        <ImageButton
+            android:id="@+id/ib_undo"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_margin="5dp"
+            android:contentDescription="undo"
+            android:scaleType="fitXY"
+            android:src="@drawable/ic_undo" />
 
         <ImageButton
             android:id="@+id/ib_brush_size"

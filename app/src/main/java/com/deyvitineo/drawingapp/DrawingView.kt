@@ -7,6 +7,7 @@ import android.util.AttributeSet
 import android.util.TypedValue
 import android.view.MotionEvent
 import android.view.View
+import android.widget.Toast
 
 
 class DrawingView(context: Context, attrs: AttributeSet) : View(context, attrs) {
@@ -19,6 +20,7 @@ class DrawingView(context: Context, attrs: AttributeSet) : View(context, attrs) 
     private var mColor = Color.BLACK
     private var mCanvas: Canvas? = null
     private val mPaths = ArrayList<CustomPath>()
+    private val mUndoPaths = ArrayList<CustomPath>() //use to redo
 
     init {
         setupDrawing()
@@ -95,6 +97,16 @@ class DrawingView(context: Context, attrs: AttributeSet) : View(context, attrs) 
     fun setColor(newColor: String){
         mColor = Color.parseColor(newColor)
         mDrawPaint!!.color = mColor
+    }
+
+    fun undoPath(): Boolean{
+        return if(mPaths.size > 0){
+            mUndoPaths.add(mPaths.removeAt(mPaths.size - 1))
+            invalidate() //calls on draw for paths to be drawn again
+            true
+        } else{
+            false
+        }
     }
 
 
