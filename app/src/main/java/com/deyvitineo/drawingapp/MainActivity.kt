@@ -1,10 +1,12 @@
 package com.deyvitineo.drawingapp
 
 import android.Manifest
+import android.app.Activity
 import android.app.Dialog
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
-import android.speech.tts.TextToSpeech
+import android.provider.MediaStore
 import android.view.View
 import android.widget.ImageButton
 import android.widget.Toast
@@ -44,13 +46,16 @@ class MainActivity : AppCompatActivity() {
         }
 
         ib_load_image.setOnClickListener {
-            if(isStoragePermissionGranted()){
+            if (isStoragePermissionGranted()) {
+                val pickPhotoIntent =
+                    Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
 
-            } else{
+                startActivityForResult(pickPhotoIntent, GALLERY)
+
+            } else {
                 requestStoragePermission()
             }
         }
-
     }
 
     //Show color picker dialog
@@ -91,6 +96,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+
     fun paintClicked(view: View) {
         if (view != mImageButtonCurrentPaint) {
             val imageButton = view as ImageButton
@@ -113,6 +119,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    //Requests access to read and write to storage
     private fun requestStoragePermission() {
         if (ActivityCompat.shouldShowRequestPermissionRationale(
                 this,
@@ -128,10 +135,35 @@ class MainActivity : AppCompatActivity() {
                 Toast.LENGTH_LONG
             ).show()
         }
-        ActivityCompat.requestPermissions(this, arrayOf(
-            Manifest.permission.READ_EXTERNAL_STORAGE,
-            Manifest.permission.WRITE_EXTERNAL_STORAGE
-        ), STORAGE_PERMISSION_CODE)
+        ActivityCompat.requestPermissions(
+            this, arrayOf(
+                Manifest.permission.READ_EXTERNAL_STORAGE,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE
+            ), STORAGE_PERMISSION_CODE
+        )
+    }
+
+    //Loads image from intent after the user selects it
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (resultCode == Activity.RESULT_OK) {
+            if (requestCode == GALLERY) {
+                try {
+                    if (data?.data != null) {
+                        iv_background.visibility = View.VISIBLE
+                        iv_background.setImageURI(data.data)
+                    } else {
+                        Toast.makeText(
+                            this,
+                            "Error in parsing the image or it is corrupted",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            }
+        }
     }
 
     override fun onRequestPermissionsResult(
@@ -140,22 +172,24 @@ class MainActivity : AppCompatActivity() {
         grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if(requestCode == STORAGE_PERMISSION_CODE){
-            if(grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED){
+        if (requestCode == STORAGE_PERMISSION_CODE) {
+            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 Toast.makeText(this, "Permission Granted", Toast.LENGTH_SHORT).show()
-            } else{
-               Toast.makeText(this, "Permission denied", Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(this, "Permission denied", Toast.LENGTH_SHORT).show()
             }
         }
     }
 
-    private  fun isStoragePermissionGranted(): Boolean{
-        val result = ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
+    private fun isStoragePermissionGranted(): Boolean {
+        val result =
+            ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
 
         return result == PackageManager.PERMISSION_GRANTED
     }
 
     companion object {
         private const val STORAGE_PERMISSION_CODE = 1
+        private const val GALLERY = 2
     }
 }

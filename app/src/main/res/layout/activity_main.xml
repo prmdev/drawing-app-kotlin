@@ -23,8 +23,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:contentDescription="background_image"
-            android:scaleType="centerCrop"
-            android:src="@drawable/sample_image" />
+            android:scaleType="centerCrop" />
 
         <com.deyvitineo.drawingapp.DrawingView
             android:id="@+id/drawing_view"
@@ -34,7 +33,7 @@
     </FrameLayout>
 
 
-    <!--TODO("Add pallet color picker) -->
+    <!--TODO(Modify colors picker UI) -->
     <LinearLayout
         android:id="@+id/layout_paint_colors"
         android:layout_width="wrap_content"
