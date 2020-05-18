@@ -103,6 +103,7 @@ class DrawingView(context: Context, attrs: AttributeSet) : View(context, attrs) 
         return if(mPaths.size > 0){
             mUndoPaths.add(mPaths.removeAt(mPaths.size - 1))
             invalidate() //calls on draw for paths to be drawn again
+
             true
         } else{
             false
