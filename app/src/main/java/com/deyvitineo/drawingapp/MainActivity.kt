@@ -19,8 +19,11 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.get
+import com.deyvitineo.drawingapp.util.Constants
 import com.github.dhaval2404.colorpicker.ColorPickerDialog
 import com.github.dhaval2404.colorpicker.model.ColorShape
+import com.github.dhaval2404.colorpicker.widget.ColorPalette
+import de.hdodenhof.circleimageview.CircleImageView
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.dialog_brush_size.*
 import java.io.ByteArrayOutputStream
@@ -29,57 +32,79 @@ import java.io.FileOutputStream
 
 class MainActivity : AppCompatActivity() {
 
-    private var mImageButtonCurrentPaint: ImageButton? = null
-    private var mColor: String = "#000000"
+    private var mImageButtonCurrentPaint: CircleImageView? = null
+    private var mColor: String = Constants.DEFAULT_COLOR
+
+    private lateinit var mBrushSizeButton: ImageButton
+    private lateinit var mColorPickerPalette: ColorPalette
+    private lateinit var mUndoButton: ImageButton
+    private lateinit var mLoadImageButton: ImageButton
+    private lateinit var mSaveImageButton: ImageButton
+    private lateinit var mCurrentColorView: CircleImageView
+    private lateinit var mRedoButton: ImageButton
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        mImageButtonCurrentPaint = layout_paint_colors[1] as ImageButton
+        initWidgets()
+        initListeners()
 
-        mImageButtonCurrentPaint!!.setImageDrawable(
-            ContextCompat.getDrawable(
-                this,
-                R.drawable.pallet_selected
-            )
-        )
+        mImageButtonCurrentPaint = layout_paint_colors[0] as CircleImageView
+    }
 
-        ib_brush_size.setOnClickListener {
-            showBrushSizeDialog()
-        }
+    //Initializes widgets
+    private fun initWidgets() {
 
-        color_picker.setOnClickListener {
-            initColorPicker()
-        }
+        mBrushSizeButton = findViewById(R.id.ib_brush_size)
+        mColorPickerPalette = findViewById(R.id.color_picker)
+        mUndoButton = findViewById(R.id.ib_undo)
+        mLoadImageButton = findViewById(R.id.ib_load_image)
+        mSaveImageButton = findViewById(R.id.ib_save)
+        mCurrentColorView = findViewById(R.id.civ_current_color)
+        mRedoButton = findViewById(R.id.ib_redo)
 
-        ib_undo.setOnClickListener {
-            val undoPerformed = drawing_view.undoPath()
-            if (!undoPerformed) {
-                Toast.makeText(this, "There is nothing to undo", Toast.LENGTH_SHORT).show()
-            }
-        }
+    }
 
-        ib_load_image.setOnClickListener {
+    //Initializes listeners for all image buttons
+    private fun initListeners() {
+        mBrushSizeButton.setOnClickListener { showBrushSizeDialog() }
+        mColorPickerPalette.setOnClickListener { initColorPicker() }
+
+        mLoadImageButton.setOnClickListener {
             if (isStoragePermissionGranted()) {
-                val pickPhotoIntent =
-                    Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
-
-                startActivityForResult(pickPhotoIntent, GALLERY)
-
+                val pickPhotoIntent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+                startActivityForResult(pickPhotoIntent, Constants.GALLERY_CODE)
             } else {
                 requestStoragePermission()
             }
         }
 
-        ib_save.setOnClickListener {
+        mSaveImageButton.setOnClickListener {
             if (isStoragePermissionGranted()) {
                 BitmapAsyncTask(getBitmapFromView(fl_drawing_view_container)).execute()
             } else {
                 requestStoragePermission()
             }
         }
+
+        mUndoButton.setOnClickListener {
+            val undoPath = drawing_view.undoPath()
+            if (!undoPath){
+                Toast.makeText(this, "There is nothing to undo", Toast.LENGTH_SHORT).show()
+            } else{
+                mRedoButton.alpha = Constants.FULL_OPACITY //if there is something to redo, change opacity to 100%
+            }
+        }
+        mRedoButton.setOnClickListener {
+            val redoPath = drawing_view.redoPath()
+            if (!redoPath){
+                mRedoButton.alpha = Constants.HALF_OPACITY //if there is nothing to redo, change the opacity back to 50%
+                TODO("find a way to be able to observe the arrays size on the other class so that this can be done with that instead")
+            }
+        }
     }
+
 
     //Show color picker dialog
     private fun initColorPicker() {
@@ -89,6 +114,7 @@ class MainActivity : AppCompatActivity() {
             .setDefaultColor(mColor)
             .setColorListener { color, colorHex ->
                 mColor = colorHex
+                mCurrentColorView.setColorFilter(color)
                 drawing_view.setColor(colorHex)
             }
             .show()
@@ -120,24 +146,15 @@ class MainActivity : AppCompatActivity() {
     }
 
 
+    //Selects a color from the basic ones provided
     fun paintClicked(view: View) {
         if (view != mImageButtonCurrentPaint) {
-            val imageButton = view as ImageButton
+            val imageButton = view as CircleImageView
             val colorTag = imageButton.tag.toString()
 
             mColor = colorTag
+            mCurrentColorView.setColorFilter(Color.parseColor(mColor))
             drawing_view.setColor(colorTag)
-            imageButton.setImageDrawable(
-                ContextCompat.getDrawable(
-                    this, R.drawable.pallet_selected
-                )
-            )
-            mImageButtonCurrentPaint!!.setImageDrawable(
-                ContextCompat.getDrawable(
-                    this,
-                    R.drawable.pallet_normal
-                )
-            )
             mImageButtonCurrentPaint = view
         }
     }
@@ -153,16 +170,16 @@ class MainActivity : AppCompatActivity() {
             )
         ) {
             Toast.makeText(
-                this,
-                "In order to load or save images, the permission must be granted. This can be done in the settings menu of your phone.",
-                Toast.LENGTH_LONG
+                this, "Missing storage permission. This can be added in your phone settings.", Toast.LENGTH_LONG
             ).show()
         }
         ActivityCompat.requestPermissions(
-            this, arrayOf(
+            this,
+            arrayOf(
                 Manifest.permission.READ_EXTERNAL_STORAGE,
                 Manifest.permission.WRITE_EXTERNAL_STORAGE
-            ), STORAGE_PERMISSION_CODE
+            ),
+            Constants.STORAGE_PERMISSION_CODE
         )
     }
 
@@ -170,17 +187,13 @@ class MainActivity : AppCompatActivity() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (resultCode == Activity.RESULT_OK) {
-            if (requestCode == GALLERY) {
+            if (requestCode == Constants.GALLERY_CODE) {
                 try {
                     if (data?.data != null) {
                         iv_background.visibility = View.VISIBLE
                         iv_background.setImageURI(data.data)
                     } else {
-                        Toast.makeText(
-                            this,
-                            "Error in parsing the image or it is corrupted",
-                            Toast.LENGTH_SHORT
-                        ).show()
+                        Toast.makeText(this, "Error loading the image, please try again", Toast.LENGTH_SHORT).show()
                     }
                 } catch (e: Exception) {
                     e.printStackTrace()
@@ -189,13 +202,10 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<out String>,
-        grantResults: IntArray
-    ) {
+    //Handles results from permissions request
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == STORAGE_PERMISSION_CODE) {
+        if (requestCode == Constants.STORAGE_PERMISSION_CODE) {
             if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 Toast.makeText(this, "Permission Granted", Toast.LENGTH_SHORT).show()
             } else {
@@ -204,12 +214,13 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    //Checks if the user already granted storage (read and write) permissions
     private fun isStoragePermissionGranted(): Boolean {
         val result =
             ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
-
         return result == PackageManager.PERMISSION_GRANTED
     }
+
 
     private fun getBitmapFromView(view: View): Bitmap {
         val returnedBitmap = Bitmap.createBitmap(view.width, view.height, Bitmap.Config.ARGB_8888)
@@ -226,6 +237,7 @@ class MainActivity : AppCompatActivity() {
         return returnedBitmap
     }
 
+
     //TODO: replace with something better
     private inner class BitmapAsyncTask(val mBitmap: Bitmap) : AsyncTask<Any, Void, String>() {
 
@@ -237,7 +249,8 @@ class MainActivity : AppCompatActivity() {
                     val outputStream = ByteArrayOutputStream()
                     mBitmap.compress(Bitmap.CompressFormat.JPEG, 95, outputStream)
 
-                    val filepath = Environment.getExternalStorageDirectory().absolutePath + "/DCIM/DrawingApp"
+                    val filepath =
+                        Environment.getExternalStorageDirectory().absolutePath + "/DCIM/DrawingApp"
 
                     val directory = File(filepath)
 
@@ -280,10 +293,5 @@ class MainActivity : AppCompatActivity() {
             }
 
         }
-    }
-
-    companion object {
-        private const val STORAGE_PERMISSION_CODE = 1
-        private const val GALLERY = 2
     }
 }

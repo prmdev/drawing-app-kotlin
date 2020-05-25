@@ -7,10 +7,10 @@ import android.util.AttributeSet
 import android.util.TypedValue
 import android.view.MotionEvent
 import android.view.View
-import android.widget.Toast
 
 
 class DrawingView(context: Context, attrs: AttributeSet) : View(context, attrs) {
+
 
     private var mDrawPath: CustomPath? = null
     private var mCanvasBitmap: Bitmap? = null
@@ -20,7 +20,7 @@ class DrawingView(context: Context, attrs: AttributeSet) : View(context, attrs) 
     private var mColor = Color.BLACK
     private var mCanvas: Canvas? = null
     private val mPaths = ArrayList<CustomPath>()
-    private val mUndoPaths = ArrayList<CustomPath>() //use to redo
+    private val mRedoPaths = ArrayList<CustomPath>()
 
     init {
         setupDrawing()
@@ -80,6 +80,9 @@ class DrawingView(context: Context, attrs: AttributeSet) : View(context, attrs) 
                 }
             }
             MotionEvent.ACTION_UP -> {
+                if (mRedoPaths.size > 0) { //if something is drawn after undoing, the redo array is being cleared
+                    mRedoPaths.clear()
+                }
                 mPaths.add(mDrawPath!!)
                 mDrawPath = CustomPath(mColor, mBrushSize)
             }
@@ -89,28 +92,57 @@ class DrawingView(context: Context, attrs: AttributeSet) : View(context, attrs) 
         return true
     }
 
-    fun setBrushSize(newSize: Float){
+    /**
+     * Sets new Brush size
+     * @param newSize -> brush's new size
+     */
+    fun setBrushSize(newSize: Float) {
         mBrushSize = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, newSize, resources.displayMetrics)
         mDrawPaint!!.strokeWidth = mBrushSize
     }
 
-    fun setColor(newColor: String){
+    /**
+     * Sets new brush color
+     * @param newColor -> String for the new color (it is converted from hexadecimal to Color)
+     */
+    fun setColor(newColor: String) {
         mColor = Color.parseColor(newColor)
         mDrawPaint!!.color = mColor
     }
 
-    fun undoPath(): Boolean{
-        return if(mPaths.size > 0){
-            mUndoPaths.add(mPaths.removeAt(mPaths.size - 1))
+    /**
+     * It removes the last drawing available from the mPaths array. If a path can be undone, it will return true, false otherwise. It also adds
+     * the removed path to the mRedoPaths array which holds all the paths that can be redone
+     */
+    fun undoPath(): Boolean {
+        return if (mPaths.size > 0) {
+            mRedoPaths.add(mPaths.removeAt(mPaths.size - 1))
             invalidate() //calls on draw for paths to be drawn again
-
             true
-        } else{
+        } else {
+            false
+        }
+    }
+
+    /**
+     * It redoes a path if one is available. The mRedoPaths array is cleared whenever the user draws something
+     */
+    fun redoPath(): Boolean {
+        return if (mRedoPaths.size > 0) {
+            mPaths.add(mRedoPaths.removeAt(mRedoPaths.size - 1))
+            invalidate()
+            true
+        } else {
             false
         }
     }
 
 
+    /**
+     * Custom path class used to store the color and brush thickness of every path
+     * @param color -> holds the color value
+     * @param brushThickness -> holds the thickness of the brush
+     */
     internal inner class CustomPath(var color: Int, var brushThickness: Float) : Path() {
 
     }

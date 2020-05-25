@@ -4,19 +4,18 @@
     <color name="colorPrimaryDark">#3700B3</color>
     <color name="colorAccent">#03DAC5</color>
 
-    <color name="white">#FFFFFF</color>
+
     <color name="grey">#FF999999</color>
     <color name="grey_selected">#FF333333</color>
+    <color name="color_border">#767A7A7A</color>
 
-    <!--TODO("Add pallet color picker) -->
-    <color name="skin">#ffcc99</color>
     <color name="black">#000000</color>
-    <color name="red">#ff0000</color>
-    <color name="green">#00ff00</color>
-    <color name="blue">#0000ff</color>
-    <color name="yellow">#ffff00</color>
-    <color name="lollipop">#35a79c</color>
-    <color name="purple">#A349B1</color>
+    <color name="white">#FFFFFF</color>
+    <color name="red">#FF0000</color>
+    <color name="green">#00FF00</color>
+    <color name="blue">#0000FF</color>
+    <color name="yellow">#FFFF00</color>
+    <color name="purple">#6600FF</color>
+    <color name="orange">#FF6600</color>
 
-    <color name="rainbow">#FF7F00</color>
 </resources>
