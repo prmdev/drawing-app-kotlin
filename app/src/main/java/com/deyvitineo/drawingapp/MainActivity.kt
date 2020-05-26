@@ -8,6 +8,7 @@ import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
+import android.media.MediaScannerConnection
 import android.os.AsyncTask
 import android.os.Bundle
 import android.os.Environment
@@ -90,17 +91,18 @@ class MainActivity : AppCompatActivity() {
 
         mUndoButton.setOnClickListener {
             val undoPath = drawing_view.undoPath()
-            if (!undoPath){
+            if (!undoPath) {
                 Toast.makeText(this, "There is nothing to undo", Toast.LENGTH_SHORT).show()
-            } else{
+            } else {
                 mRedoButton.alpha = Constants.FULL_OPACITY //if there is something to redo, change opacity to 100%
             }
         }
         mRedoButton.setOnClickListener {
             val redoPath = drawing_view.redoPath()
-            if (!redoPath){
+            if (!redoPath) {
                 mRedoButton.alpha = Constants.HALF_OPACITY //if there is nothing to redo, change the opacity back to 50%
                 TODO("find a way to be able to observe the arrays size on the other class so that this can be done with that instead")
+                TODO("Maybe have the Paths stored temporally stored in room database")
             }
         }
     }
@@ -159,6 +161,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    //TODO: try to move to an util class
     //Requests access to read and write to storage
     private fun requestStoragePermission() {
         if (ActivityCompat.shouldShowRequestPermissionRationale(
@@ -290,6 +293,20 @@ class MainActivity : AppCompatActivity() {
                     "Something went wrong saving the file",
                     Toast.LENGTH_SHORT
                 ).show()
+            }
+
+            //Allows user to share image when its saved
+            MediaScannerConnection.scanFile(this@MainActivity, arrayOf(result), null) { path, uri ->
+                val shareIntent = Intent()
+                shareIntent.action = Intent.ACTION_SEND
+                shareIntent.putExtra(Intent.EXTRA_STREAM, uri)
+                shareIntent.type = "image/jpeg"
+
+                startActivity(
+                    Intent.createChooser(
+                        shareIntent, "Share"
+                    )
+                )
             }
 
         }
