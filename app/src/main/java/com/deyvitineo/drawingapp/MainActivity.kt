@@ -101,8 +101,7 @@ class MainActivity : AppCompatActivity() {
             val redoPath = drawing_view.redoPath()
             if (!redoPath) {
                 mRedoButton.alpha = Constants.HALF_OPACITY //if there is nothing to redo, change the opacity back to 50%
-                TODO("find a way to be able to observe the arrays size on the other class so that this can be done with that instead")
-                TODO("Maybe have the Paths stored temporally stored in room database")
+                //"Maybe have the Paths stored temporally stored in room database" "find a way to be able to observe the arrays size on the other class so that this can be done with that instead"
             }
         }
     }
