@@ -1,4 +1,4 @@
-package com.deyvitineo.drawingapp
+package com.prmdev.drawingapp
 
 import android.annotation.SuppressLint
 import android.content.Context

@@ -1,4 +1,4 @@
-package com.deyvitineo.drawingapp
+package com.prmdev.drawingapp
 
 import android.Manifest
 import android.app.Activity
@@ -20,7 +20,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.get
-import com.deyvitineo.drawingapp.util.Constants
+import com.prmdev.drawingapp.util.Constants
 import com.github.dhaval2404.colorpicker.ColorPickerDialog
 import com.github.dhaval2404.colorpicker.model.ColorShape
 import com.github.dhaval2404.colorpicker.widget.ColorPalette

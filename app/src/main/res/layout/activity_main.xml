@@ -25,7 +25,7 @@
             android:contentDescription="background_image"
             android:scaleType="centerCrop" />
 
-        <com.deyvitineo.drawingapp.DrawingView
+        <com.prmdev.drawingapp.DrawingView
             android:id="@+id/drawing_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />

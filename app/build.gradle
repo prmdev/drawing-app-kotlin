@@ -7,7 +7,7 @@ android {
     buildToolsVersion "29.0.0"
 
     defaultConfig {
-        applicationId "com.deyvitineo.drawingapp"
+        applicationId "com.prmdev.drawingapp"
         minSdkVersion 24
         targetSdkVersion 28
         versionCode 1

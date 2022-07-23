@@ -1,4 +1,4 @@
-package com.deyvitineo.drawingapp.util
+package com.prmdev.drawingapp.util
 
 object Constants {
 
